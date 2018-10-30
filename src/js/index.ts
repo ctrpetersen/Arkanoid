@@ -13,6 +13,10 @@ var bricks;
 var score = 0;
 var scoreText;
 
+var lives = 3;
+var livesText;
+
+
 var readyToShoot = true;
 
 var config = {
@@ -51,8 +55,12 @@ function create() {
     var graphics = this.add.graphics(0,0)
     graphics.fillStyle(0x000000, 1.0);
     graphics.fillRect(0, 0, width*scaling, 32);
+
     this.add.text(this.cameras.main.centerX-36, -5, 'HIGH SCORE', { fontSize: '22px', fill: '#FF0000', fontFamily: 'VT323' });
-    scoreText = this.add.text(this.cameras.main.centerX, 10, '0', { fontSize: '22px', fill: '#FFFFFF', fontFamily: 'VT323' });
+    scoreText = this.add.text(this.cameras.main.centerX, 12, '0', { fontSize: '22px', fill: '#FFFFFF', fontFamily: 'VT323' });
+
+    this.add.text(60, -5, '1UP', { fontSize: '22px', fill: '#FF0000', fontFamily: 'VT323' });
+    livesText = this.add.text(70, 12, '3', { fontSize: '22px', fill: '#FFFFFF', fontFamily: 'VT323' });
    
 
     bricks = this.physics.add.staticGroup();
@@ -86,8 +94,13 @@ function create() {
 }
 
 function update(){
-    if (cursors.left.isDown) { paddle.setVelocityX(-200); }
-    else if (cursors.right.isDown) { paddle.setVelocityX(200); }
+    if (this.input.activePointer.isDown && this.input.activePointer.y < 170 && readyToShoot) {
+        readyToShoot = false;
+        ball.setVelocityY(-300)
+    }
+    
+    if (cursors.left.isDown || (this.input.activePointer.isDown && this.input.activePointer.x < 230)) { paddle.setVelocityX(-200); }
+    else if (cursors.right.isDown || this.input.activePointer.isDown) { paddle.setVelocityX(200); }
     else { paddle.setVelocityX(0); }
 
     if (paddle.x > 402) { paddle.x = 402; }
@@ -100,6 +113,23 @@ function update(){
         ball.setVelocityY(-300)
         ball.setVelocityX(paddle.body.velocity.x);
     }
+
+    if (ball.y > 530){
+        readyToShoot = true;
+        ball.x = paddle.x-3
+        ball.y = paddle.y-20;
+        ball.setVelocityX(0);
+        ball.setVelocityY(0);
+
+        lives--;
+        livesText.setText(lives);
+        if (lives == 0){
+            this.scene.restart();
+            lives = 3;
+            score = 0;
+        }
+    }
+
 }
 
 function bounceBall():void{
@@ -118,3 +148,4 @@ function killBlock(ball, brick){
     score++;
     scoreText.setText(score);
 }
+
