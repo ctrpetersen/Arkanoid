@@ -36,7 +36,15 @@ module.exports = {
       }
       
     },
-
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {}
+          }
+        ]
+      },
     {
       //all fonts are vopied to the fonts folder
       test: /.(ttf|otf|eot|otf|svg|woff(2)?)(\?[a-z0-9]+)?$/,
