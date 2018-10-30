@@ -1,4 +1,6 @@
-#canvas{
-    width: 448;
-    height: 480;
+html, body {
+    height:100%;
+    background-color: black;
 }
+html {display:table; width:100%;}
+body {display:table-cell; text-align:center; vertical-align:middle;}
