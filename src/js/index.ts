@@ -36,12 +36,12 @@ var config = {
 var game = new Phaser.Game(config);
 
 function preload() {
-    this.load.image('background', 'http://localhost:8080/assets/background.png');
-    this.load.image('ball', 'http://localhost:8080/assets/ball.png');
-    this.load.image('paddle', 'http://localhost:8080/assets/paddle.png');
-    this.load.image('borderTop', 'http://localhost:8080/assets/borderTop.png');
-    this.load.image('borderSide', 'http://localhost:8080/assets/borderSide.png');
-    this.load.image('brick', 'http://localhost:8080/assets/brick.png');
+    this.load.image('background', 'arkanoid/assets/background.png');
+    this.load.image('ball', 'arkanoid/assets/ball.png');
+    this.load.image('paddle', 'arkanoid/assets/paddle.png');
+    this.load.image('borderTop', 'arkanoid/assets/borderTop.png');
+    this.load.image('borderSide', 'arkanoid/assets/borderSide.png');
+    this.load.image('brick', 'arkanoid/assets/brick.png');
 }
 
 function create() {
