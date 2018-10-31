@@ -4,6 +4,8 @@ const width = 224;
 const height = 256;
 const scaling = 2;
 
+var speedScaling = 1.0;
+
 var border;
 var paddle;
 var cursors;
@@ -36,12 +38,12 @@ var config = {
 var game = new Phaser.Game(config);
 
 function preload() {
-    this.load.image('background', 'arkanoid/assets/background.png');
-    this.load.image('ball', 'arkanoid/assets/ball.png');
-    this.load.image('paddle', 'arkanoid/assets/paddle.png');
-    this.load.image('borderTop', 'arkanoid/assets/borderTop.png');
-    this.load.image('borderSide', 'arkanoid/assets/borderSide.png');
-    this.load.image('brick', 'arkanoid/assets/brick.png');
+    this.load.image('background', 'http://ctrpetersen.azurewebsites.net/arkanoid/assets/background.png');
+    this.load.image('ball', 'http://ctrpetersen.azurewebsites.net/arkanoid/assets/ball.png');
+    this.load.image('paddle', 'http://ctrpetersen.azurewebsites.net/arkanoid/assets/paddle.png');
+    this.load.image('borderTop', 'http://ctrpetersen.azurewebsites.net/arkanoid/assets/borderTop.png');
+    this.load.image('borderSide', 'http://ctrpetersen.azurewebsites.net/arkanoid/assets/borderSide.png');
+    this.load.image('brick', 'http://ctrpetersen.azurewebsites.net/arkanoid/assets/brick.png');
 }
 
 function create() {
@@ -57,15 +59,19 @@ function create() {
     graphics.fillRect(0, 0, width*scaling, 32);
 
     this.add.text(this.cameras.main.centerX-36, -5, 'HIGH SCORE', { fontSize: '22px', fill: '#FF0000', fontFamily: 'VT323' });
-    scoreText = this.add.text(this.cameras.main.centerX, 12, '0', { fontSize: '22px', fill: '#FFFFFF', fontFamily: 'VT323' });
+    scoreText = this.add.text(this.cameras.main.centerX, 12, score, { fontSize: '22px', fill: '#FFFFFF', fontFamily: 'VT323' });
 
     this.add.text(60, -5, '1UP', { fontSize: '22px', fill: '#FF0000', fontFamily: 'VT323' });
-    livesText = this.add.text(70, 12, '3', { fontSize: '22px', fill: '#FFFFFF', fontFamily: 'VT323' });
+    livesText = this.add.text(70, 12, lives, { fontSize: '22px', fill: '#FFFFFF', fontFamily: 'VT323' });
    
 
     bricks = this.physics.add.staticGroup();
     
-    for (let i = 0; i <5; i++) {
+
+    //    for (let i = 0; i < 5; i++) {
+    //      for (let x = 0; x < 11; x++) {
+
+    for (let i = 0; i < 5; i++) {
         for (let x = 0; x < 11; x++) {
             var hex = randomHex();
             var graphics = this.add.graphics(0,0);
@@ -96,7 +102,7 @@ function create() {
 function update(){
     if (this.input.activePointer.isDown && this.input.activePointer.y < 170 && readyToShoot) {
         readyToShoot = false;
-        ball.setVelocityY(-300)
+        ball.setVelocityY(-300*speedScaling)
     }
     
     if (cursors.left.isDown || (this.input.activePointer.isDown && this.input.activePointer.x < 230)) { paddle.setVelocityX(-200); }
@@ -110,8 +116,8 @@ function update(){
 
     if (cursors.up.isDown && readyToShoot){
         readyToShoot = false;
-        ball.setVelocityY(-300)
-        ball.setVelocityX(paddle.body.velocity.x);
+        ball.setVelocityY(-300*speedScaling)
+        ball.setVelocityX(paddle.body.velocity.x*speedScaling);
     }
 
     if (ball.y > 530){
@@ -127,6 +133,9 @@ function update(){
             this.scene.restart();
             lives = 3;
             score = 0;
+            speedScaling = 1;
+            
+            //enter name and submit score
         }
     }
 
@@ -134,9 +143,9 @@ function update(){
 
 function bounceBall():void{
     var diff = (Math.abs(ball.x - paddle.x)) * 6;
-    ball.setVelocityY(-300)
-    if (ball.x > paddle.x) { ball.setVelocityX(diff) }
-    else { ball.setVelocityX(-diff) }
+    ball.setVelocityY(-300*speedScaling)
+    if (ball.x > paddle.x) { ball.setVelocityX(diff*speedScaling) }
+    else { ball.setVelocityX(-diff*speedScaling) }
 }
 
 function randomHex(){
@@ -145,7 +154,24 @@ function randomHex(){
 
 function killBlock(ball, brick){
     brick.destroy();
+    speedScaling += 0.001;
     score++;
     scoreText.setText(score);
+
+    if (bricks.getLength() < 1){
+        this.scene.restart();
+        readyToShoot = true;
+        lives++;
+        score += 10;
+        livesText.setText(lives);
+        scoreText.setText(score);
+    }
 }
 
+function submitScore(){
+
+}
+
+function fetchScores(){
+
+}
