@@ -1,4 +1,7 @@
 const Phaser = require('phaser');
+const axios = require('axios');
+
+const hsTable: HTMLTableElement = <HTMLTableElement>document.getElementById("hsTable");
 
 const width = 224;
 const height = 256;
