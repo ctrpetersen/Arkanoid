@@ -1,6 +1,6 @@
 const Phaser = require('phaser');
 const axios = require('axios');
-const api = 'http://arkanoidhighscores.azurewebsites.net/api/highscores';
+const api = 'https://arkanoidhighscores.azurewebsites.net/api/highscores';
 
 const hsTable: HTMLTableElement = <HTMLTableElement>document.getElementById('hsTable');
 const submitScoreButton: HTMLButtonElement = <HTMLButtonElement>document.getElementById('submitScoreButton');
@@ -50,12 +50,12 @@ var config = {
 var game = new Phaser.Game(config);
 
 function preload() {
-    this.load.image('background', 'http://ctrpetersen.azurewebsites.net/arkanoid/assets/background.png');
-    this.load.image('ball', 'http://ctrpetersen.azurewebsites.net/arkanoid/assets/ball.png');
-    this.load.image('paddle', 'http://ctrpetersen.azurewebsites.net/arkanoid/assets/paddle.png');
-    this.load.image('borderTop', 'http://ctrpetersen.azurewebsites.net/arkanoid/assets/borderTop.png');
-    this.load.image('borderSide', 'http://ctrpetersen.azurewebsites.net/arkanoid/assets/borderSide.png');
-    this.load.image('brick', 'http://ctrpetersen.azurewebsites.net/arkanoid/assets/brick.png');
+    this.load.image('background', 'https://ctrpetersen.azurewebsites.net/arkanoid/assets/background.png');
+    this.load.image('ball', 'https://ctrpetersen.azurewebsites.net/arkanoid/assets/ball.png');
+    this.load.image('paddle', 'https://ctrpetersen.azurewebsites.net/arkanoid/assets/paddle.png');
+    this.load.image('borderTop', 'https://ctrpetersen.azurewebsites.net/arkanoid/assets/borderTop.png');
+    this.load.image('borderSide', 'https://ctrpetersen.azurewebsites.net/arkanoid/assets/borderSide.png');
+    this.load.image('brick', 'https://ctrpetersen.azurewebsites.net/arkanoid/assets/brick.png');
 }
 
 function create() {
