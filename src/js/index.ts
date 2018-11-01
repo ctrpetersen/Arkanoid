@@ -1,7 +1,15 @@
 const Phaser = require('phaser');
 const axios = require('axios');
+const api = 'http://arkanoidhighscores.azurewebsites.net/api/highscores';
 
-const hsTable: HTMLTableElement = <HTMLTableElement>document.getElementById("hsTable");
+const hsTable: HTMLTableElement = <HTMLTableElement>document.getElementById('hsTable');
+const submitScoreButton: HTMLButtonElement = <HTMLButtonElement>document.getElementById('submitScoreButton');
+const nameInput: HTMLInputElement = <HTMLInputElement>document.getElementById('nameInput');
+const scoreBox: HTMLInputElement = <HTMLInputElement>document.getElementById('scoreBox');
+const submitScoreDiv: HTMLDivElement = <HTMLDivElement>document.getElementById('submitScoreDiv');
+
+
+submitScoreButton.addEventListener("click", function () { submitScore() });
 
 const width = 224;
 const height = 256;
@@ -16,6 +24,7 @@ var ball;
 var bricks;
 
 var score = 0;
+var scoreToSubmit = 0;
 var scoreText;
 
 var lives = 3;
@@ -57,19 +66,19 @@ function create() {
     border.create(0, 47, 'borderSide').setOrigin(0, 0).refreshBody();
     border.create(432, 47, 'borderSide').setOrigin(0, 0).refreshBody();
 
-    var graphics = this.add.graphics(0,0)
+    var graphics = this.add.graphics(0, 0)
     graphics.fillStyle(0x000000, 1.0);
-    graphics.fillRect(0, 0, width*scaling, 32);
+    graphics.fillRect(0, 0, width * scaling, 32);
 
-    this.add.text(this.cameras.main.centerX-36, -5, 'HIGH SCORE', { fontSize: '22px', fill: '#FF0000', fontFamily: 'VT323' });
+    this.add.text(this.cameras.main.centerX - 36, -5, 'HIGH SCORE', { fontSize: '22px', fill: '#FF0000', fontFamily: 'VT323' });
     scoreText = this.add.text(this.cameras.main.centerX, 12, score, { fontSize: '22px', fill: '#FFFFFF', fontFamily: 'VT323' });
 
     this.add.text(60, -5, '1UP', { fontSize: '22px', fill: '#FF0000', fontFamily: 'VT323' });
     livesText = this.add.text(70, 12, lives, { fontSize: '22px', fill: '#FFFFFF', fontFamily: 'VT323' });
-   
+
 
     bricks = this.physics.add.staticGroup();
-    
+
 
     //    for (let i = 0; i < 5; i++) {
     //      for (let x = 0; x < 11; x++) {
@@ -77,13 +86,13 @@ function create() {
     for (let i = 0; i < 5; i++) {
         for (let x = 0; x < 11; x++) {
             var hex = randomHex();
-            var graphics = this.add.graphics(0,0);
+            var graphics = this.add.graphics(0, 0);
             graphics.fillStyle(0x000000, 1.0);
             graphics.fillRect(0, 0, 37, 18);
             graphics.fillStyle(hex, 1.0);
             graphics.fillRect(0, 0, 35, 16);
             graphics.generateTexture(hex.toString(), 37, 18);
-            bricks.create((x*38)+16, (i*19)+100, hex.toString()).setOrigin(0, 0).refreshBody();
+            bricks.create((x * 38) + 16, (i * 19) + 100, hex.toString()).setOrigin(0, 0).refreshBody();
             graphics.destroy();
         }
     }
@@ -91,7 +100,7 @@ function create() {
     paddle = this.physics.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY + 220, 'paddle');
     paddle.body.immovable = true;
 
-    ball = this.physics.add.sprite(this.cameras.main.centerX-3, this.cameras.main.centerY + 202, 'ball');
+    ball = this.physics.add.sprite(this.cameras.main.centerX - 3, this.cameras.main.centerY + 202, 'ball');
     ball.setBounce(1);
 
     this.physics.add.collider(ball, border);
@@ -102,66 +111,71 @@ function create() {
     cursors = this.input.keyboard.createCursorKeys();
 }
 
-function update(){
+function update() {
     if (this.input.activePointer.isDown && this.input.activePointer.y < 170 && readyToShoot) {
         readyToShoot = false;
-        ball.setVelocityY(-300*speedScaling)
+        ball.setVelocityY(-300 * speedScaling)
     }
-    
+
     if (cursors.left.isDown || (this.input.activePointer.isDown && this.input.activePointer.x < 230)) { paddle.setVelocityX(-200); }
     else if (cursors.right.isDown || this.input.activePointer.isDown) { paddle.setVelocityX(200); }
     else { paddle.setVelocityX(0); }
 
     if (paddle.x > 402) { paddle.x = 402; }
-    else if (paddle.x <50) {paddle.x = 50; }
+    else if (paddle.x < 50) { paddle.x = 50; }
 
-    if (readyToShoot) { ball.x = paddle.x-3 }
+    if (readyToShoot) { ball.x = paddle.x - 3 }
 
-    if (cursors.up.isDown && readyToShoot){
+    if (cursors.up.isDown && readyToShoot) {
         readyToShoot = false;
-        ball.setVelocityY(-300*speedScaling)
-        ball.setVelocityX(paddle.body.velocity.x*speedScaling);
+        ball.setVelocityY(-300 * speedScaling)
+        ball.setVelocityX(paddle.body.velocity.x * speedScaling);
     }
 
-    if (ball.y > 530){
+    if (ball.y > 530) {
         readyToShoot = true;
-        ball.x = paddle.x-3
-        ball.y = paddle.y-20;
+        ball.x = paddle.x - 3
+        ball.y = paddle.y - 20;
         ball.setVelocityX(0);
         ball.setVelocityY(0);
 
         lives--;
         livesText.setText(lives);
-        if (lives == 0){
+        if (lives == 0) {
             this.scene.restart();
             lives = 3;
+            scoreToSubmit = score;
+
+            scoreBox.value = scoreToSubmit.toString();
+
             score = 0;
             speedScaling = 1;
-            
+
             //enter name and submit score
+            submitScoreDiv.hidden = false;
         }
     }
 
 }
 
-function bounceBall():void{
+function bounceBall(): void {
     var diff = (Math.abs(ball.x - paddle.x)) * 6;
-    ball.setVelocityY(-300*speedScaling)
-    if (ball.x > paddle.x) { ball.setVelocityX(diff*speedScaling) }
-    else { ball.setVelocityX(-diff*speedScaling) }
+    ball.setVelocityY(-300 * speedScaling)
+    if (ball.x > paddle.x) { ball.setVelocityX(diff * speedScaling) }
+    else { ball.setVelocityX(-diff * speedScaling) }
 }
 
-function randomHex(){
-    return '0x' + ("000000" + Math.random().toString(16).slice(2, 8).toUpperCase()).slice(-6);
+function randomHex() {
+    return '0x' + ('000000' + Math.random().toString(16).slice(2, 8).toUpperCase()).slice(-6);
 }
 
-function killBlock(ball, brick){
+function killBlock(ball, brick) {
     brick.destroy();
     speedScaling += 0.001;
     score++;
     scoreText.setText(score);
 
-    if (bricks.getLength() < 1){
+    if (bricks.getLength() < 1) {
         this.scene.restart();
         readyToShoot = true;
         lives++;
@@ -171,10 +185,57 @@ function killBlock(ball, brick){
     }
 }
 
-function submitScore(){
+function submitScore() {
+    console.log("submitting score!!!")
 
+    var name = nameInput.value;
+    var score = scoreToSubmit;
+
+    if (name == "") {return};
+
+    axios.post(api, {
+        name: name,
+        score: score
+    })
+        .then(function (response) {
+            console.log(response);
+            
+            for (let i = 1; i < hsTable.rows.length; i++) {
+                hsTable.deleteRow(i);
+                
+            }
+            submitScoreDiv.hidden = true;
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
 }
 
-function fetchScores(){
+function fetchScores() {
+    var scores = 0;
+    axios.get(api)
+        .then(function (response) {
+            response.data.forEach(higshcore => {
+                if (scores > 12) { return; }
+                var hsRow = document.createElement('tr');
+                hsTable.appendChild(hsRow);
 
+                var elName = document.createElement('td');
+                var elScore = document.createElement('td');
+
+                elName.innerHTML = higshcore.name;
+                elScore.innerHTML = higshcore.score;
+
+                hsTable.appendChild(elName);
+                hsTable.appendChild(elScore);
+                scores++;
+            });
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
 }
+
+submitScoreDiv.hidden = true;
+fetchScores();
+
