@@ -56,6 +56,11 @@ function preload() {
     this.load.image('borderTop', 'https://ctrpetersen.azurewebsites.net/arkanoid/assets/borderTop.png');
     this.load.image('borderSide', 'https://ctrpetersen.azurewebsites.net/arkanoid/assets/borderSide.png');
     this.load.image('brick', 'https://ctrpetersen.azurewebsites.net/arkanoid/assets/brick.png');
+    this.load.image('brick', 'https://ctrpetersen.azurewebsites.net/arkanoid/assets/brick.png');
+
+    this.load.audio('paddlehit', 'https://ctrpetersen.azurewebsites.net/arkanoid/assets/paddlehit.mp3');
+    this.load.audio('brickhit', 'https://ctrpetersen.azurewebsites.net/arkanoid/assets/brickhit.mp3');
+    this.load.audio('borderhit', 'https://ctrpetersen.azurewebsites.net/arkanoid/assets/borderhit.mp3');
 }
 
 function create() {
@@ -103,7 +108,7 @@ function create() {
     ball = this.physics.add.sprite(this.cameras.main.centerX - 3, this.cameras.main.centerY + 202, 'ball');
     ball.setBounce(1);
 
-    this.physics.add.collider(ball, border);
+    this.physics.add.collider(ball, border, function(){this.sound.play('borderhit')}, null, this);
     this.physics.add.collider(ball, bricks, killBlock, null, this);
 
     this.physics.add.overlap(paddle, ball, bounceBall, null, this);
@@ -151,7 +156,6 @@ function update() {
             score = 0;
             speedScaling = 1;
 
-            //enter name and submit score
             submitScoreDiv.hidden = false;
         }
     }
@@ -163,6 +167,8 @@ function bounceBall(): void {
     ball.setVelocityY(-300 * speedScaling)
     if (ball.x > paddle.x) { ball.setVelocityX(diff * speedScaling) }
     else { ball.setVelocityX(-diff * speedScaling) }
+
+    this.sound.play('paddlehit');
 }
 
 function randomHex() {
@@ -171,11 +177,13 @@ function randomHex() {
 
 function killBlock(ball, brick) {
     brick.destroy();
-    speedScaling += 0.001;
     score++;
     scoreText.setText(score);
 
+    this.sound.play('brickhit');
+
     if (bricks.getLength() < 1) {
+        speedScaling *= 1.1;
         this.scene.restart();
         readyToShoot = true;
         lives++;
@@ -186,7 +194,6 @@ function killBlock(ball, brick) {
 }
 
 function submitScore() {
-    console.log("submitting score!!!")
 
     var name = nameInput.value;
     var score = scoreToSubmit;
@@ -198,17 +205,8 @@ function submitScore() {
         score: score
     })
         .then(function (response) {
-            console.log(response);
-            
-            for (let i = 1; i < hsTable.rows.length; i++) {
-                hsTable.deleteRow(i);
-                
-            }
             submitScoreDiv.hidden = true;
         })
-        .catch(function (error) {
-            console.log(error);
-        });
 }
 
 function fetchScores() {
@@ -226,13 +224,10 @@ function fetchScores() {
                 elName.innerHTML = higshcore.name;
                 elScore.innerHTML = higshcore.score;
 
-                hsTable.appendChild(elName);
-                hsTable.appendChild(elScore);
+                hsRow.appendChild(elName);
+                hsRow.appendChild(elScore);
                 scores++;
             });
-        })
-        .catch(function (error) {
-            console.log(error);
         })
 }
 
