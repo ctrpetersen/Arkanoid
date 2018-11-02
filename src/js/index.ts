@@ -30,6 +30,9 @@ var scoreText;
 var lives = 3;
 var livesText;
 
+var twBricks;
+var twPaddle;
+var twBall;
 
 var readyToShoot = true;
 
@@ -108,12 +111,38 @@ function create() {
     ball = this.physics.add.sprite(this.cameras.main.centerX - 3, this.cameras.main.centerY + 202, 'ball');
     ball.setBounce(1);
 
-    this.physics.add.collider(ball, border, function(){this.sound.play('borderhit')}, null, this);
+    this.physics.add.collider(ball, border, function () {
+        this.sound.play('borderhit');
+        if (!twBall.isPlaying()) { twBall.restart(); };
+    }, null, this);
     this.physics.add.collider(ball, bricks, killBlock, null, this);
 
     this.physics.add.overlap(paddle, ball, bounceBall, null, this);
 
     cursors = this.input.keyboard.createCursorKeys();
+
+    twBricks = this.tweens.add({
+        targets: bricks.getChildren(),
+        props: {
+            scaleY: { value: 0.9, duration: 50, ease: 'Linear', yoyo: true, delay: 0 },
+            scaleX: { value: 0.9, duration: 50, ease: 'Linear', yoyo: true, delay: 0 }
+        }
+    });
+
+    twPaddle = this.tweens.add({
+        targets: paddle,
+        props: {
+            scaleX: { value: 1.2, duration: 50, ease: 'Linear', yoyo: true, delay: 0 }
+        }
+    });
+
+    twBall = this.tweens.add({
+        targets: ball,
+        props: {
+            scaleY: { value: 1.5, duration: 50, ease: 'Linear', yoyo: true, delay: 0 },
+            scaleX: { value: 1.5, duration: 50, ease: 'Linear', yoyo: true, delay: 0 }
+        }
+    });
 }
 
 function update() {
@@ -168,6 +197,8 @@ function bounceBall(): void {
     if (ball.x > paddle.x) { ball.setVelocityX(diff * speedScaling) }
     else { ball.setVelocityX(-diff * speedScaling) }
 
+    if (!twPaddle.isPlaying()) { twPaddle.restart(); };
+    if (!twBall.isPlaying()) { twBall.restart(); };
     this.sound.play('paddlehit');
 }
 
@@ -177,6 +208,8 @@ function randomHex() {
 
 function killBlock(ball, brick) {
     brick.destroy();
+    if (!twBricks.isPlaying()) { twBricks.restart(); };
+    if (!twBall.isPlaying()) { twBall.restart(); };
     score++;
     scoreText.setText(score);
 
@@ -198,7 +231,7 @@ function submitScore() {
     var name = nameInput.value;
     var score = scoreToSubmit;
 
-    if (name == "") {return};
+    if (name == "") { return };
 
     axios.post(api, {
         name: name,
